@@ -1,158 +1,111 @@
-import { useMemo, useState } from 'react'
+import { useState } from 'react';
+import './App.css';
 
-const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000'
+const API_BASE = 'http://localhost:8000';
 
 function App() {
-  const [files, setFiles] = useState([])
-  const [results, setResults] = useState([])
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
-  const [highlight, setHighlight] = useState(true)
+  const [files, setFiles] = useState([]);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [error, setError] = useState(null);
 
-  const handleFileChange = (e) => {
-    const list = Array.from(e.target.files || [])
-    setFiles(list)
-    setResults([])
-    setError('')
-  }
+  const handleFileChange = (event) => {
+    setFiles(Array.from(event.target.files));
+    setError(null); // Clear previous errors on new file selection
+  };
 
-  const handleClear = () => {
-    setFiles([])
-    setResults([])
-    setError('')
-  }
-
-  const handleExtract = async () => {
-    if (!files.length) return
-    setLoading(true)
-    setError('')
-    try {
-      const form = new FormData()
-      for (const f of files) form.append('files', f)
-
-      const res = await fetch(`${API_BASE}/extract`, {
-        method: 'POST',
-        body: form,
-      })
-      if (!res.ok) throw new Error(`Server error ${res.status}`)
-      const data = await res.json()
-      setResults(data.results || [])
-    } catch (err) {
-      setError(err.message || 'Failed to extract text')
-    } finally {
-      setLoading(false)
+  const handleProcessRubrics = async () => {
+    if (!files.length) {
+      setError('Please select at least one PDF file.');
+      return;
     }
-  }
 
-  const allText = useMemo(() => results.map(r => `# ${r.filename}\n\n${r.text}`).join('\n\n\n'), [results])
+    setIsProcessing(true);
+    setError(null);
 
-  const handleDownloadTxt = () => {
-    const blob = new Blob([allText || ''], { type: 'text/plain' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = 'rubric-extracted.txt'
-    a.click()
-    URL.revokeObjectURL(url)
-  }
+    const formData = new FormData();
+    files.forEach(file => {
+      formData.append('files', file);
+    });
 
-  const renderTextWithHighlights = (text) => {
-    if (!highlight) return <pre className="whitespace-pre-wrap text-sm">{text}</pre>
-    const re = /(score|scores|comment|comments)/gi
-    const parts = text.split(re)
-    return (
-      <pre className="whitespace-pre-wrap text-sm">
-        {parts.map((p, i) =>
-          re.test(p) ? (
-            <mark key={i} className="bg-yellow-200 text-black px-1 rounded">{p}</mark>
-          ) : (
-            <span key={i}>{p}</span>
-          )
-        )}
-      </pre>
-    )
-  }
+    try {
+      const response = await fetch(`${API_BASE}/process-rubrics`, {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errData = await response.json();
+        throw new Error(errData.detail || 'An unknown error occurred.');
+      }
+
+      // Handle the zip file download
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = url;
+      // The filename is set by the Content-Disposition header from the backend
+      a.download = 'rubric_results.zip'; 
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+    } catch (err) {
+      console.error('Processing failed:', err);
+      setError(`Processing failed: ${err.message}`);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="border-b bg-white">
-        <div className="max-w-4xl mx-auto px-4 py-4">
-          <h1 className="text-2xl font-semibold">Rubricly OCR</h1>
-          <p className="text-sm text-gray-600">Upload rubric PDF(s) → Extract text via OCR</p>
-        </div>
-      </header>
+    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center font-sans">
+      <div className="w-full max-w-2xl mx-auto p-8 bg-white rounded-lg shadow-md">
+        <header className="text-center mb-8">
+          <h1 className="text-4xl font-bold text-gray-800">Rubricly</h1>
+          <p className="text-gray-600 mt-2">
+            Automated Rubric Processing with Computer Vision
+          </p>
+        </header>
 
-      <main className="max-w-4xl mx-auto px-4 py-6 space-y-6">
-        <section className="bg-white shadow-sm rounded-lg p-4 border">
-          <div className="flex flex-col gap-3">
+        <div className="space-y-6">
+          <div className="p-6 border-2 border-dashed border-gray-300 rounded-lg text-center">
             <input
               type="file"
-              accept="application/pdf"
               multiple
+              accept=".pdf"
               onChange={handleFileChange}
-              className="file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
+              className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
             />
             {files.length > 0 && (
-              <ul className="text-sm text-gray-700 list-disc pl-5">
-                {files.map((f) => (
-                  <li key={f.name}>{f.name}</li>
-                ))}
-              </ul>
-            )}
-
-            <div className="flex items-center gap-2 pt-2">
-              <button
-                onClick={handleExtract}
-                disabled={!files.length || loading}
-                className="inline-flex items-center gap-2 rounded-md bg-indigo-600 text-white px-4 py-2 text-sm disabled:opacity-50"
-              >
-                {loading ? (
-                  <span className="animate-pulse">Processing…</span>
-                ) : (
-                  <span>Extract Text</span>
-                )}
-              </button>
-              <button
-                onClick={handleClear}
-                className="rounded-md border px-3 py-2 text-sm bg-white hover:bg-gray-50"
-              >
-                Clear
-              </button>
-              <button
-                onClick={handleDownloadTxt}
-                disabled={!results.length}
-                className="rounded-md border px-3 py-2 text-sm bg-white hover:bg-gray-50 disabled:opacity-50"
-              >
-                Download .txt
-              </button>
-              <label className="ml-auto flex items-center gap-2 text-sm text-gray-700">
-                <input type="checkbox" checked={highlight} onChange={(e) => setHighlight(e.target.checked)} />
-                Highlight terms
-              </label>
-            </div>
-
-            {error && (
-              <div className="text-sm text-red-600">{error}</div>
+              <p className="text-sm text-gray-600 mt-4">
+                {files.length} file(s) selected: {files.map(f => f.name).join(', ')}
+              </p>
             )}
           </div>
-        </section>
 
-        {!!results.length && (
-          <section className="bg-white shadow-sm rounded-lg p-4 border">
-            <h2 className="text-lg font-medium mb-3">Extracted Text</h2>
-            <div className="space-y-6 max-h-[60vh] overflow-auto">
-              {results.map((r) => (
-                <div key={r.filename} className="border rounded-md p-3">
-                  <div className="font-semibold mb-2">{r.filename}</div>
-                  {renderTextWithHighlights(r.text || '')}
-                </div>
-              ))}
+          <button
+            onClick={handleProcessRubrics}
+            disabled={isProcessing || !files.length}
+            className="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-gray-400 transition-colors duration-300"
+          >
+            {isProcessing ? 'Processing...' : 'Process Rubrics & Download Results'}
+          </button>
+
+          {error && (
+            <div className="mt-4 p-4 bg-red-100 text-red-700 border border-red-400 rounded-lg">
+              <strong>Error:</strong> {error}
             </div>
-          </section>
-        )}
-      </main>
+          )}
+        </div>
+
+        <footer className="text-center mt-8 text-sm text-gray-500">
+          <p>Upload your scanned rubric PDFs. The system will use OCR and OMR to extract the scores and comments, then provide a downloadable zip file containing a master CSV and any relevant comment images.</p>
+        </footer>
+      </div>
     </div>
-  )
+  );
 }
 
-export default App
+export default App;
