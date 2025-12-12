@@ -541,4 +541,3 @@ function extractFromTable(table, extracted) {
     }
   })
 }
-

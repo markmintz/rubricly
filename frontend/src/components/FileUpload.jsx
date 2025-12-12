@@ -1,3 +1,4 @@
+// FileUpload.jsx
 import { useRef, useState } from 'react'
 
 function FileUpload({ file, onFileSelect, onProcess, onClear, loading, error, progress }) {
@@ -38,12 +39,13 @@ function FileUpload({ file, onFileSelect, onProcess, onClear, loading, error, pr
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-xl p-6">
+    <div className="bg-card rounded-xl w-full shadow-2xl p-8 border border-gray-100"> 
       <div
-        className={`border-2 border-dashed rounded-lg p-12 text-center transition-all ${
+        // Applying the animated line border class
+        className={`rounded-xl p-12 text-center transition-all animated-line-border border-dashed ${
           isDragging
-            ? 'border-orange-500 bg-orange-50'
-            : 'border-gray-300 hover:border-orange-300'
+            ? 'is-dragging' // Custom class to enhance styling during drag
+            : 'hover:shadow-md'
         }`}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
@@ -60,7 +62,7 @@ function FileUpload({ file, onFileSelect, onProcess, onClear, loading, error, pr
         {!file ? (
           <>
             <svg
-              className="mx-auto h-16 w-16 text-gray-400 mb-4"
+              className="mx-auto h-16 w-auto text-primary mb-4"
               stroke="currentColor"
               fill="none"
               viewBox="0 0 48 48"
@@ -72,16 +74,16 @@ function FileUpload({ file, onFileSelect, onProcess, onClear, loading, error, pr
                 strokeLinejoin="round"
               />
             </svg>
-            <p className="text-lg text-gray-600 mb-2">
+            <p className="text-lg text-card-text mb-2"> {/* Explicitly dark text */}
               Drag and drop your PDF here, or
             </p>
             <button
               onClick={handleClick}
-              className="text-orange-600 hover:text-orange-700 font-semibold underline"
+              className="text-primary hover:text-secondary font-semibold underline"
             >
               browse to upload
             </button>
-            <p className="text-sm text-gray-500 mt-2">Only PDF files are accepted</p>
+            <p className="text-sm text-secondary mt-2">Only PDF files are accepted</p>
           </>
         ) : (
           <div className="space-y-4">
@@ -98,10 +100,10 @@ function FileUpload({ file, onFileSelect, onProcess, onClear, loading, error, pr
                 d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
               />
             </svg>
-            <p className="text-lg font-semibold text-gray-700">
+            <p className="text-lg font-semibold text-card-text"> {/* Explicitly dark text */}
               {file.name}
             </p>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-secondary">
               {(file.size / 1024).toFixed(2)} KB
             </p>
           </div>
@@ -109,7 +111,7 @@ function FileUpload({ file, onFileSelect, onProcess, onClear, loading, error, pr
       </div>
 
       {error && (
-        <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+        <div className="mt-4 p-4 bg-red-100 border border-red-500 rounded-lg">
           <p className="text-red-700">{error}</p>
         </div>
       )}
@@ -118,60 +120,45 @@ function FileUpload({ file, onFileSelect, onProcess, onClear, loading, error, pr
         <button
           onClick={onProcess}
           disabled={!file || loading}
-          className={`px-6 py-3 rounded-lg font-semibold text-white transition-all ${
+          className={`px-6 py-3 rounded-lg font-semibold text-white transition-all ${ 
             !file || loading
-              ? 'bg-gray-400 cursor-not-allowed'
-              : 'bg-orange-600 hover:bg-orange-700 hover:shadow-lg transform hover:-translate-y-0.5'
+              ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
+              : 'bg-primary hover:bg-primary-dark hover:shadow-lg transform hover:-translate-y-0.5'
           }`}
         >
           {loading ? (
-            <span className="flex items-center gap-2">
-              <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                  fill="none"
-                />
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                />
-              </svg>
-              Processing...
+            <span className="flex items-center justify-center">
+              {/* Polar Bear Loader - Simple and clean */}
+              <div className="polar-loader">🐻‍❄️</div> 
+              <span className="text-white">Processing...</span>
             </span>
           ) : (
             'Process PDF'
           )}
         </button>
 
-        <button
-          onClick={onClear}
-          disabled={loading}
-          className={`px-6 py-3 rounded-lg font-semibold transition-all ${
-            loading
-              ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-              : 'bg-gray-200 text-gray-700 hover:bg-gray-300 hover:shadow-lg transform hover:-translate-y-0.5'
-          }`}
-        >
-          Clear
-        </button>
-      </div>
-
-      {loading && progress && progress.total > 0 && (
-        <div className="mt-4 text-center">
-          <p className="text-sm font-medium text-orange-700">
-            Rubric's processed: {progress.current}/{progress.total}...
-          </p>
+         <button
+            onClick={onClear}
+            disabled={loading}
+            className={`px-6 py-3 rounded-lg font-semibold transition-all ${
+              loading
+                ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300 hover:shadow-lg transform hover:-translate-y-0.5'
+            }`}
+          >
+            Clear
+          </button>
         </div>
+
+        {loading && progress && progress.total > 0 && (
+          <div className="mt-4 text-center">
+            <p className="text-sm font-medium text-orange-700">
+              Rubric's processed: {progress.current}/{progress.total}...
+            </p>
+          </div>
       )}
     </div>
   )
 }
 
 export default FileUpload
-

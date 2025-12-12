@@ -1,3 +1,4 @@
+// DataPreview.jsx
 import { useState } from 'react'
 import { downloadCSV } from '../utils/csvExport'
 
@@ -62,28 +63,28 @@ function DataPreview({ data, onDataUpdate }) {
   ]
 
   return (
-    <div className="bg-white rounded-lg shadow-xl p-6">
-      <div className="flex justify-between items-center mb-6">
+    <div className="bg-card rounded-xl w-full shadow-2xl p-8 border border-gray-100">
+      <div className="flex justify-between items-center mb-6 border-b pb-4 border-gray-200">
         <div>
-          <h2 className="text-2xl font-bold text-gray-800">Parsed Data Preview</h2>
+          <h2 className="text-2xl font-bold text-card-text">Parsed Data Preview</h2> {/* Explicitly dark text */}
           {rubrics.length > 1 && (
-            <p className="text-sm text-gray-600 mt-1">
+            <p className="text-sm text-secondary mt-1">
               Found {rubrics.length} rubric{rubrics.length !== 1 ? 's' : ''} in PDF
             </p>
           )}
         </div>
         <button
           onClick={handleDownload}
-          className="px-6 py-3 bg-orange-600 text-white rounded-lg font-semibold hover:bg-orange-700 hover:shadow-lg transform hover:-translate-y-0.5 transition-all"
+          className="px-6 py-3 bg-primary text-white rounded-lg font-semibold hover:bg-primary-dark hover:shadow-lg transform hover:-translate-y-0.5 transition-all"
         >
           Download CSV ({rubrics.length} rubric{rubrics.length !== 1 ? 's' : ''})
         </button>
       </div>
 
-      {/* Rubric selector for multiple rubrics */}
+      {/* Rubric selector for multiple rubrics (Active Tab Underline) */}
       {rubrics.length > 1 && (
-        <div className="mb-6 pb-4 border-b">
-          <label className="text-sm font-medium text-gray-700 mb-2 block">
+        <div className="mb-6 pb-4 border-b border-gray-200">
+          <label className="text-sm font-medium text-card-text mb-2 block"> {/* Explicitly dark text */}
             Select Rubric:
           </label>
           <div className="flex gap-2 flex-wrap">
@@ -91,15 +92,15 @@ function DataPreview({ data, onDataUpdate }) {
               <button
                 key={index}
                 onClick={() => setSelectedRubricIndex(index)}
-                className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                className={`px-4 py-2 rounded-lg font-medium transition-all relative ${
                   selectedRubricIndex === index
-                    ? 'bg-orange-600 text-white shadow-md'
-                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                    ? 'bg-white text-primary border-b-4 border-primary font-bold shadow-md' 
+                    : 'bg-gray-100 text-card-text hover:bg-gray-200' // Explicitly dark text
                 }`}
               >
                 Rubric {index + 1}
                 {rubric.startPage && rubric.endPage && (
-                  <span className="ml-2 text-xs opacity-75">
+                  <span className="ml-2 text-xs opacity-75 text-secondary">
                     (Pages {rubric.startPage}-{rubric.endPage})
                   </span>
                 )}
@@ -112,7 +113,7 @@ function DataPreview({ data, onDataUpdate }) {
       <div className="space-y-6">
         {/* Scores Section */}
         <div>
-          <h3 className="text-xl font-semibold text-gray-700 mb-4 pb-2 border-b">
+          <h3 className="text-xl font-semibold text-primary mb-4 pb-2 border-b border-gray-200">
             Section Scores
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -122,22 +123,22 @@ function DataPreview({ data, onDataUpdate }) {
 
               return (
                 <div key={field.key} className="flex flex-col">
-                  <label className="text-sm font-medium text-gray-600 mb-1">
+                  <label className="text-sm font-medium text-card-text mb-1"> {/* Explicitly dark text */}
                     {field.label}
                   </label>
                   <input
                     type="text"
                     value={value}
                     onChange={(e) => handleFieldChange(field.key, e.target.value)}
-                    className={`px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent ${
+                    className={`animated-line-border px-4 py-2 rounded-lg focus:outline-none placeholder-secondary transition-all !border-none ${ 
                       invalid
-                        ? 'border-red-500 bg-red-50 focus:ring-red-500'
-                        : 'border-gray-300 focus:ring-orange-500'
+                        ? 'bg-red-50 text-card-text' // Explicitly dark text
+                        : 'bg-gray-50 text-card-text' // Explicitly dark text
                     }`}
                     placeholder="Not found"
                   />
                   {invalid && (
-                    <span className="mt-1 text-xs text-red-600">
+                    <span className="mt-1 text-xs text-red-500">
                       Score must be a number between 0 and 5.
                     </span>
                   )}
@@ -149,20 +150,20 @@ function DataPreview({ data, onDataUpdate }) {
 
         {/* Metadata Section */}
         <div>
-          <h3 className="text-xl font-semibold text-gray-700 mb-4 pb-2 border-b">
+          <h3 className="text-xl font-semibold text-primary mb-4 pb-2 border-b border-gray-200">
             Metadata
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {metadataFields.map((field) => (
               <div key={field.key} className="flex flex-col">
-                <label className="text-sm font-medium text-gray-600 mb-1">
+                <label className="text-sm font-medium text-card-text mb-1"> {/* Explicitly dark text */}
                   {field.label}
                 </label>
                 <input
                   type="text"
                   value={currentRubric[field.key] || ''}
                   onChange={(e) => handleFieldChange(field.key, e.target.value)}
-                  className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  className="animated-line-border px-4 py-2 rounded-lg focus:outline-none transition-all bg-gray-50 placeholder-secondary !border-none text-card-text" // Explicitly dark text
                   placeholder="Not found"
                 />
               </div>
@@ -172,14 +173,14 @@ function DataPreview({ data, onDataUpdate }) {
 
         {/* Comments Section */}
         <div>
-          <h3 className="text-xl font-semibold text-gray-700 mb-4 pb-2 border-b">
+          <h3 className="text-xl font-semibold text-primary mb-4 pb-2 border-b border-gray-200">
             Comments
           </h3>
           <textarea
             value={currentRubric.comments || ''}
             onChange={(e) => handleFieldChange('comments', e.target.value)}
             rows={6}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-y"
+            className="animated-line-border w-full px-4 py-2 rounded-lg focus:outline-none transition-all resize-y bg-gray-50 placeholder-secondary !border-none text-card-text" // Explicitly dark text
             placeholder="No comments found"
           />
         </div>
@@ -189,4 +190,3 @@ function DataPreview({ data, onDataUpdate }) {
 }
 
 export default DataPreview
-

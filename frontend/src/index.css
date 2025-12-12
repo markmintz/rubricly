@@ -1,16 +1,123 @@
+/* index.css */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  /* Soft white + orange-inspired background, slightly more orange */
-  background: #fff1de 0%;
-  min-height: 100vh;
+/* ONU Elegant High-Contrast Theme (Official Colors)
+  Primary Accent: ONU Orange (#F36532)
+  Text/Container: ONU Black (#231F20)
+  Background: Soft Light Gray (#F8F8F8)
+  Secondary Accent: ONU Gray (#7B7979)
+  
+  NOTE: Body background is set to ONU Black for best visibility of the dot animation.
+*/
+
+:root {
+  /* ONU Brand Colors */
+  --color-primary: #F36532; /* Orange (Dot Color) */
+  --color-secondary: #7B7979; /* Gray */
+  --color-text: #F8F8F8; /* Light Text for dark background (Header/Body) */
+  --color-background: #231F20; /* ONU Black (Main Background for Canvas) */
+  --color-card: #FFFFFF; /* White for content cards */
 }
 
+body {
+  margin: 0;
+  font-family: 'Roboto', 'Helvetica Neue', 'Arial', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  
+  background: var(--color-background); /* Dark background for canvas effect */
+  color: var(--color-text); /* Light text on dark background for body-level text */
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden; 
+}
+
+/* Custom Utilities for Rebranding */
+@layer utilities {
+  .bg-primary {
+    background-color: var(--color-primary);
+  }
+  .hover\:bg-primary-dark:hover {
+    background-color: #d85c2c; /* Slightly darker orange */
+  }
+  .text-primary {
+    color: var(--color-primary);
+  }
+  .text-secondary {
+    color: var(--color-secondary);
+  }
+  .border-primary {
+    border-color: var(--color-primary);
+  }
+  .bg-card {
+    background-color: var(--color-card);
+  }
+  /* Utility for text that sits inside the white cards (since body default is light) */
+  .text-card-text {
+      color: #231F20; /* ONU Black for text inside white cards */
+  }
+}
+
+/* ------------------------------------------------ */
+/* Unique CSS Features for WOW Factor & Elegance */
+/* ------------------------------------------------ */
+
+/* Polar Bear Loader - Walking (Kept Simple and Smooth) */
+@keyframes polar-walk {
+  0% { transform: translateX(-5px); }
+  50% { transform: translateX(5px); }
+  100% { transform: translateX(-5px); }
+}
+
+.polar-loader {
+  display: inline-block;
+  animation: polar-walk 0.7s infinite alternate ease-in-out; 
+  font-size: 1.5rem; 
+  color: #FFFFFF; 
+  line-height: 1; 
+  margin-right: 8px;
+}
+
+/* Canvas Element for Shape Shifter - Minimal styles for proper display */
+canvas { 
+    display: block; 
+}
+.body--ready {
+    /* Class added by JS, intentionally left blank as the canvas handles the background */
+}
+
+
+/* Elegance Factor 2: Animated Line Border (Codepen 2 inspired) */
+.animated-line-border {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease-in-out;
+  border: 1px solid var(--color-secondary); /* Base border (ONU Gray) */
+  box-sizing: border-box;
+}
+
+/* The orange line that animates */
+.animated-line-border::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: -100%; /* Start off-screen to the left */
+  width: 100%;
+  height: 4px;
+  background-color: var(--color-primary); /* ONU Orange line */
+  transition: left 0.3s ease-out;
+}
+
+/* Hover/Focus states for line animation */
+.animated-line-border:hover::after,
+.animated-line-border:focus-within::after {
+  left: 0; /* Move line fully to the left (draws from left to right) */
+}
+
+/* Styling for Drop Zone when dragging */
+.animated-line-border.is-dragging {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 15px rgba(243, 101, 50, 0.3); /* Subtle orange glow */
+}
